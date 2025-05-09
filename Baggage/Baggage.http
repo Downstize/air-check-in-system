@@ -1,0 +1,6 @@
+@Baggage_HostAddress = http://localhost:5247
+
+GET {{Baggage_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

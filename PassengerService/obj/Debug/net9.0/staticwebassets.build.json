@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "2eud2DRTNn2Q09Cfymx14U9fR/FSwIduMjcx73G/tfQ=",
+  "Source": "PassengerService",
+  "BasePath": "_content/PassengerService",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

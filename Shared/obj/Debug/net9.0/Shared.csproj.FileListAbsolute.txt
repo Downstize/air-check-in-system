@@ -1,0 +1,12 @@
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared/bin/Debug/net9.0/Shared.deps.json
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared/bin/Debug/net9.0/Shared.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared/bin/Debug/net9.0/Shared.pdb
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared/obj/Debug/net9.0/Shared.GeneratedMSBuildEditorConfig.editorconfig
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared/obj/Debug/net9.0/Shared.AssemblyInfoInputs.cache
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared/obj/Debug/net9.0/Shared.AssemblyInfo.cs
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared/obj/Debug/net9.0/Shared.csproj.CoreCompileInputs.cache
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared/obj/Debug/net9.0/Shared.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared/obj/Debug/net9.0/refint/Shared.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared/obj/Debug/net9.0/Shared.pdb
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared/obj/Debug/net9.0/ref/Shared.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared/obj/Debug/net9.0/Shared.sourcelink.json

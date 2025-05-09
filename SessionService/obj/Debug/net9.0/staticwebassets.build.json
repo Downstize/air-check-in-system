@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "MT44HiPfAbnpx3SAUD5UKg1lam7hKaonHqw8id9QfHs=",
+  "Source": "SessionService",
+  "BasePath": "_content/SessionService",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

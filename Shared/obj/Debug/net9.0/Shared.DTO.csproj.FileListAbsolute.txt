@@ -1,0 +1,11 @@
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared.DTO/bin/Debug/net9.0/Shared.DTO.deps.json
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared.DTO/bin/Debug/net9.0/Shared.DTO.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared.DTO/bin/Debug/net9.0/Shared.DTO.pdb
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared.DTO/obj/Debug/net9.0/Shared.DTO.GeneratedMSBuildEditorConfig.editorconfig
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared.DTO/obj/Debug/net9.0/Shared.DTO.AssemblyInfoInputs.cache
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared.DTO/obj/Debug/net9.0/Shared.DTO.AssemblyInfo.cs
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared.DTO/obj/Debug/net9.0/Shared.DTO.csproj.CoreCompileInputs.cache
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared.DTO/obj/Debug/net9.0/Shared.DTO.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared.DTO/obj/Debug/net9.0/refint/Shared.DTO.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared.DTO/obj/Debug/net9.0/Shared.DTO.pdb
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Shared.DTO/obj/Debug/net9.0/ref/Shared.DTO.dll

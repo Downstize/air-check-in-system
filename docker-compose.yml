@@ -1,0 +1,331 @@
+services:
+  postgres_registration:
+    image: postgres:15
+    container_name: postgres_registration_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: registrationDb
+    ports:
+      - "6432:5432"
+    volumes:
+      - postgres_registration_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "registrationDb"]
+      interval: 5s
+      retries: 10
+      timeout: 5s
+    networks:
+      - backend
+
+  postgres_baggage:
+    image: postgres:15
+    container_name: postgres_baggage_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: baggageDb
+    ports:
+      - "6433:5432"
+    volumes:
+      - postgres_baggage_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "baggageDb"]
+      interval: 5s
+      retries: 10
+      timeout: 5s
+    networks:
+      - backend
+
+  postgres_passenger:
+    image: postgres:15
+    container_name: postgres_passenger_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: passengerDb
+    ports:
+      - "6434:5432"
+    volumes:
+      - postgres_passenger_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "passengerDb"]
+      interval: 5s
+      retries: 10
+      timeout: 5s
+    networks:
+      - backend
+
+  postgres_session:
+    image: postgres:15
+    container_name: postgres_session_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sessionDb
+    ports:
+      - "6435:5432"
+    volumes:
+      - postgres_session_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "sessionDb"]
+      interval: 5s
+      retries: 10
+      timeout: 5s
+    networks:
+      - backend
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      retries: 10
+      timeout: 5s
+    networks:
+      - backend
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    container_name: elasticsearch
+    restart: always
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      xpack.security.transport.ssl.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
+      interval: 10s
+      retries: 10
+    networks:
+      - backend
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.2
+    container_name: kibana
+    restart: always
+    environment:
+      ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - backend
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.12.2
+    container_name: logstash
+    restart: always
+    environment:
+      LS_JAVA_OPTS: "-Xms256m -Xmx256m"
+    ports:
+      - "5044:5044"
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - backend
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: always
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - backend
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: always
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - backend
+
+  # Сервисы в нужном порядке
+  passenger:
+    build:
+      context: .
+      dockerfile: PassengerService/Dockerfile
+    image: passengerservice:latest
+    container_name: passenger_service
+    restart: always
+    ports:
+      - "8082:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__PassengerDb: "Host=postgres_passenger_db;Username=postgres;Password=postgres;Database=passengerDb"
+      RabbitMQ__HostName: rabbitmq
+    depends_on:
+      postgres_passenger:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - backend
+
+  session:
+    build:
+      context: .
+      dockerfile: SessionService/Dockerfile
+    image: sessionservice:latest
+    container_name: session_service
+    restart: always
+    ports:
+      - "8084:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__SessionDb: "Host=postgres_session_db;Username=postgres;Password=postgres;Database=sessionDb"
+      RabbitMQ__HostName: rabbitmq
+    depends_on:
+      passenger:
+        condition: service_started
+      postgres_session:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - backend
+
+  registration:
+    build:
+      context: .
+      dockerfile: Registration/Dockerfile
+    image: registrationservice:latest
+    container_name: registration_service
+    restart: always
+    ports:
+      - "8083:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__RegistrationDb: "Host=postgres_registration_db;Username=postgres;Password=postgres;Database=registrationDb"
+      RabbitMQ__HostName: rabbitmq
+    depends_on:
+      session:
+        condition: service_started
+      postgres_registration:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - backend
+
+  baggage:
+    build:
+      context: .
+      dockerfile: Baggage/Dockerfile
+    image: baggage:latest
+    container_name: baggage_service
+    restart: always
+    ports:
+      - "8081:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__BaggageDb: "Host=postgres_baggage_db;Username=postgres;Password=postgres;Database=baggageDb"
+      RabbitMQ__HostName: rabbitmq
+    depends_on:
+      registration:
+        condition: service_started
+      postgres_baggage:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - backend
+
+  aircheckin_orchestrator:
+    build:
+      context: .
+      dockerfile: AirCheckInOrchestrator.Api/Dockerfile
+    image: aircheckinorchestrator:latest
+    container_name: aircheckin_orchestrator
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__RegistrationDb: "Host=postgres_registration_db;Username=postgres;Password=postgres;Database=registrationDb"
+      ConnectionStrings__BaggageDb: "Host=postgres_baggage_db;Username=postgres;Password=postgres;Database=baggageDb"
+      ConnectionStrings__PassengerDb: "Host=postgres_passenger_db;Username=postgres;Password=postgres;Database=passengerDb"
+      ConnectionStrings__SessionDb: "Host=postgres_session_db;Username=postgres;Password=postgres;Database=sessionDb"
+      RabbitMQ__HostName: rabbitmq
+      RabbitMQ__UserName: guest
+      RabbitMQ__Password: guest
+    depends_on:
+      baggage:
+        condition: service_started
+      postgres_registration:
+        condition: service_healthy
+      postgres_baggage:
+        condition: service_healthy
+      postgres_passenger:
+        condition: service_healthy
+      postgres_session:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - backend
+        
+  frontend:
+    build:
+      context: ./air-check-in-orchestrator-frontend
+      dockerfile: Dockerfile
+    container_name: aircheckin_frontend
+    restart: always
+    ports:
+      - "3002:80"
+    environment:
+      - REACT_APP_ORCHESTRATOR_URL=http://aircheckin_orchestrator:8080/api
+      - REACT_APP_REGISTRATION_URL=http://registration_service:8080/api
+      - REACT_APP_BAGGAGE_URL=http://baggage_service:8080/api
+      - REACT_APP_PASSENGER_URL=http://passenger_service:8080/api
+      - REACT_APP_SESSION_URL=http://session_service:8080/api
+    depends_on:
+      - aircheckin_orchestrator
+    networks:
+      - backend
+
+volumes:
+  postgres_registration_data:
+  postgres_baggage_data:
+  postgres_passenger_data:
+  postgres_session_data:
+  esdata:
+
+networks:
+  backend:
+    driver: bridge
