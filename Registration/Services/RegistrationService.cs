@@ -15,39 +15,52 @@ namespace Registration.Services
         private readonly ApplicationDbContext _db;
         private readonly PassengerClient _passengerClient;
         private readonly IPublishEndpoint _publish;
+        private readonly ILogger<RegistrationService> _logger;
 
-        public RegistrationService(ApplicationDbContext db, PassengerClient passengerClient, IPublishEndpoint publish)
+        public RegistrationService(ApplicationDbContext db, PassengerClient passengerClient, IPublishEndpoint publish, ILogger<RegistrationService> logger)
         {
             _db = db;
             _passengerClient = passengerClient;
             _publish = publish;
+            _logger = logger;
         }
 
         public async Task<RegistrationAuthResponseDto> AuthenticateAsync(RegistrationAuthRequestDto req)
         {
             var dynamicId = Guid.NewGuid().ToString();
-            
+            _logger.LogInformation("Генерация нового DynamicId: {DynamicId}", dynamicId);
+
             await _publish.Publish(new DynamicIdRegistered
             {
                 DynamicId = dynamicId,
                 CreatedAt = DateTime.UtcNow
             });
 
+            _logger.LogInformation("DynamicId опубликован в шину: {DynamicId}", dynamicId);
             return new() { DynamicId = dynamicId };
         }
 
         public async Task<RegistrationOrderSearchResponseDto> SearchOrderAsync(RegistrationOrderSearchRequestDto req)
         {
+            _logger.LogInformation("Поиск заказа: PNR={PnrId}, LastName={LastName}", req.PnrId, req.LastName);
+
             var order = await _passengerClient.GetOrderByPnrAndLastnameAsync(req.DynamicId, req.PnrId, req.LastName);
 
             if (order == null)
+            {
+                _logger.LogWarning("Заказ не найден в PassengerService: PNR={PnrId}, LastName={LastName}", req.PnrId, req.LastName);
                 throw new KeyNotFoundException("Order not found in Passenger Service");
+            }
 
+            _logger.LogInformation("Заказ найден: OrderId={OrderId}", order.OrderId);
             return new RegistrationOrderSearchResponseDto { Order = order };
         }
 
         public async Task<RegistrationSeatReserveResponseDto> ReserveSeatAsync(RegistrationSeatReserveRequestDto req)
         {
+            _logger.LogInformation("Попытка резервирования места: PassengerId={PassengerId}, DepartureId={DepartureId}, Seat={SeatNumber}",
+                req.PassengerId, req.DepartureId, req.SeatNumber);
+
             var existing = await _db.SeatReservations.FirstOrDefaultAsync(s =>
                     s.DepartureId == req.DepartureId &&
                     s.SeatNumber == req.SeatNumber &&
@@ -56,9 +69,10 @@ namespace Registration.Services
 
             if (existing != null)
             {
+                _logger.LogWarning("Место уже занято другим пассажиром: Seat={SeatNumber}, DepartureId={DepartureId}", req.SeatNumber, req.DepartureId);
                 throw new InvalidOperationException($"Seat {req.SeatNumber} на рейсе {req.DepartureId} уже занято другим пассажиром.");
             }
-            
+
             var ownExisting = await _db.SeatReservations.FirstOrDefaultAsync(s =>
                 s.DepartureId == req.DepartureId &&
                 s.SeatNumber == req.SeatNumber &&
@@ -67,12 +81,13 @@ namespace Registration.Services
 
             if (ownExisting != null)
             {
+                _logger.LogInformation("Место уже зарезервировано текущим пассажиром: Seat={SeatNumber}", ownExisting.SeatNumber);
                 return new RegistrationSeatReserveResponseDto
                 {
                     Seat = new() { SeatNumber = ownExisting.SeatNumber }
                 };
             }
-            
+
             var res = new SeatReservation
             {
                 DynamicId = req.DynamicId,
@@ -81,8 +96,11 @@ namespace Registration.Services
                 SeatNumber = req.SeatNumber,
                 ReservedAt = DateTime.UtcNow
             };
+
             _db.SeatReservations.Add(res);
             await _db.SaveChangesAsync();
+
+            _logger.LogInformation("Место успешно зарезервировано: Seat={SeatNumber}", res.SeatNumber);
 
             return new RegistrationSeatReserveResponseDto
             {
@@ -90,20 +108,30 @@ namespace Registration.Services
             };
         }
 
-
         public async Task<RegistrationPassengerResponseDto> RegisterFreeAsync(RegistrationPassengerFreeRequestDto req)
-            => await RegisterAsync(req.DynamicId, req.DepartureId, req.PassengerId, req.SeatNumber, false);
+        {
+            _logger.LogInformation("Бесплатная регистрация пассажира: PassengerId={PassengerId}", req.PassengerId);
+            return await RegisterAsync(req.DynamicId, req.DepartureId, req.PassengerId, req.SeatNumber, false);
+        }
 
         public async Task<RegistrationPassengerResponseDto> RegisterPaidAsync(RegistrationPassengerPaidRequestDto req)
-            => await RegisterAsync(req.DynamicId, req.DepartureId, req.PassengerId, req.SeatNumber, true);
+        {
+            _logger.LogInformation("Платная регистрация пассажира: PassengerId={PassengerId}", req.PassengerId);
+            return await RegisterAsync(req.DynamicId, req.DepartureId, req.PassengerId, req.SeatNumber, true);
+        }
 
         private async Task<RegistrationPassengerResponseDto> RegisterAsync(
             string dynamicId, string departureId, string passengerId, string seatNumber, bool paid)
         {
-            var passenger = await _passengerClient.GetPassengerByIdAsync(dynamicId,passengerId);
+            _logger.LogInformation("Регистрация пассажира: PassengerId={PassengerId}, Paid={Paid}", passengerId, paid);
+
+            var passenger = await _passengerClient.GetPassengerByIdAsync(dynamicId, passengerId);
             if (passenger == null)
+            {
+                _logger.LogWarning("Пассажир не найден в PassengerService: PassengerId={PassengerId}", passengerId);
                 throw new KeyNotFoundException("Passenger not found in Passenger Service");
-            
+            }
+
             if (paid)
             {
                 var payment = await _db.Payments.FirstOrDefaultAsync(p =>
@@ -114,34 +142,48 @@ namespace Registration.Services
                     p.IsPaid);
 
                 if (payment == null)
+                {
+                    _logger.LogError("Оплата не найдена: PassengerId={PassengerId}, DepartureId={DepartureId}", passengerId, departureId);
                     throw new Exception($"Оплата не найдена для пассажира {passengerId} на рейсе {departureId}.");
-                
+                }
+
                 if (payment.Amount <= 0)
+                {
+                    _logger.LogError("Сумма оплаты недопустима: {Amount}", payment.Amount);
                     throw new Exception($"Оплата найдена, но сумма {payment.Amount} недопустима.");
+                }
             }
 
-            var rec = new RegistrationRecord {
-                DynamicId      = dynamicId,
-                DepartureId    = departureId,
-                PassengerId    = passengerId,
-                SeatNumber     = seatNumber,
-                IsPaid         = paid,
-                RegisteredAt   = DateTime.UtcNow
+            var rec = new RegistrationRecord
+            {
+                DynamicId = dynamicId,
+                DepartureId = departureId,
+                PassengerId = passengerId,
+                SeatNumber = seatNumber,
+                IsPaid = paid,
+                RegisteredAt = DateTime.UtcNow
             };
+
             _db.RegistrationRecords.Add(rec);
             await _db.SaveChangesAsync();
-            return new RegistrationPassengerResponseDto {
-                DynamicId    = dynamicId,
-                DepartureId  = departureId,
-                PassengerId  = passengerId,
-                SeatNumber   = seatNumber,
-                IsPaid       = paid,
+
+            _logger.LogInformation("Пассажир успешно зарегистрирован: PassengerId={PassengerId}, Seat={Seat}, Paid={Paid}", passengerId, seatNumber, paid);
+
+            return new RegistrationPassengerResponseDto
+            {
+                DynamicId = dynamicId,
+                DepartureId = departureId,
+                PassengerId = passengerId,
+                SeatNumber = seatNumber,
+                IsPaid = paid,
                 RegisteredAt = rec.RegisteredAt
             };
         }
-        
+
         public async Task<bool> SimulatePaymentAsync(string dynamicId, string passengerId, string departureId, decimal amount)
         {
+            _logger.LogInformation("Симуляция оплаты: PassengerId={PassengerId}, Amount={Amount}", passengerId, amount);
+
             var payment = new Payment
             {
                 DynamicId = dynamicId,
@@ -154,8 +196,9 @@ namespace Registration.Services
 
             _db.Payments.Add(payment);
             await _db.SaveChangesAsync();
+
+            _logger.LogInformation("Оплата успешно сохранена в БД: PassengerId={PassengerId}, Amount={Amount}", passengerId, amount);
             return true;
         }
-
     }
 }

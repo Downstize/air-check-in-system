@@ -9,12 +9,18 @@ namespace PassengerService.Consumers;
 public class GetPassengerConsumer : IConsumer<GetPassengerRequest>
 {
     private readonly ApplicationDbContext _db;
+    private readonly ILogger<GetPassengerConsumer> _logger;
 
-    public GetPassengerConsumer(ApplicationDbContext db) => _db = db;
+    public GetPassengerConsumer(ApplicationDbContext db, ILogger<GetPassengerConsumer> logger)
+    {
+        _db = db;
+        _logger = logger;
+    }
 
     public async Task Consume(ConsumeContext<GetPassengerRequest> context)
     {
         var req = context.Message;
+        _logger.LogInformation("Получен запрос на получение пассажира с ID: {PassengerId}", req.PassengerId);
 
         var p = await _db.Passengers
             .Include(p => p.Document)
@@ -22,7 +28,10 @@ public class GetPassengerConsumer : IConsumer<GetPassengerRequest>
             .FirstOrDefaultAsync(p => p.PassengerId == req.PassengerId);
 
         if (p == null)
+        {
+            _logger.LogWarning("Пассажир с ID {PassengerId} не найден", req.PassengerId);
             throw new KeyNotFoundException($"Passenger {req.PassengerId} не найден.");
+        }
 
         var dto = new PassengerDto
         {
@@ -62,9 +71,7 @@ public class GetPassengerConsumer : IConsumer<GetPassengerRequest>
             BookingId = p.BookingId
         };
 
-        await context.RespondAsync(new GetPassengerResponse
-        {
-            Passenger = dto
-        });
+        await context.RespondAsync(new GetPassengerResponse { Passenger = dto });
+        _logger.LogInformation("Ответ с данными пассажира {PassengerId} успешно отправлен", dto.PassengerId);
     }
 }

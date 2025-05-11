@@ -9,8 +9,6 @@ using Shared.Messages;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// builder.WebHost.UseUrls("http://localhost:5001");
-
 builder.Host.UseSerilog();
 
 builder.Services.AddDbContext<ApplicationDbContext>(opts =>
@@ -56,6 +54,11 @@ builder.Services.AddMassTransit(x =>
 });
 
 builder.Services.AddScoped<PassengerClient>();
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+});
 
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();

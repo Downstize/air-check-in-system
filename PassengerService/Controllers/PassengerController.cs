@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using PassengerService.Data;
 using PassengerService.Models;
 using Shared.Contracts;
@@ -11,15 +12,18 @@ namespace PassengerService.Controllers;
 public class PassengerController : ControllerBase
 {
     private readonly ApplicationDbContext _db;
+    private readonly ILogger<PassengerController> _logger;
 
-    public PassengerController(ApplicationDbContext db)
+    public PassengerController(ApplicationDbContext db, ILogger<PassengerController> logger)
     {
         _db = db;
+        _logger = logger;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
+        _logger.LogInformation("Запрос на получение всех пассажиров.");
         var passengers = await _db.Passengers
             .Include(p => p.Document)
             .Include(p => p.VisaDocument)
@@ -63,19 +67,24 @@ public class PassengerController : ControllerBase
             BookingId = p.BookingId
         }).ToList();
 
+        _logger.LogInformation("Получено {Count} пассажиров.", result.Count);
         return Ok(result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(string id)
     {
+        _logger.LogInformation("Запрос на получение пассажира с ID: {PassengerId}", id);
         var p = await _db.Passengers
             .Include(p => p.Document)
             .Include(p => p.VisaDocument)
             .FirstOrDefaultAsync(p => p.PassengerId == id);
 
         if (p == null)
+        {
+            _logger.LogWarning("Пассажир с ID {PassengerId} не найден.", id);
             return NotFound();
+        }
 
         var dto = new PassengerDto
         {
@@ -115,22 +124,24 @@ public class PassengerController : ControllerBase
             BookingId = p.BookingId
         };
 
+        _logger.LogInformation("Пассажир с ID {PassengerId} успешно найден.", id);
         return Ok(dto);
     }
-
 
     [HttpPost]
     public async Task<IActionResult> Create(PassengerDto dto)
     {
+        _logger.LogInformation("Создание нового пассажира.");
         var booking = await _db.Bookings.FindAsync(dto.BookingId);
         if (booking == null)
+        {
+            _logger.LogWarning("Бронирование с ID {BookingId} не найдено.", dto.BookingId);
             return BadRequest($"Booking с Id {dto.BookingId} не найден.");
+        }
 
         var passenger = new Passenger
         {
-            PassengerId = string.IsNullOrEmpty(dto.PassengerId)
-                ? Guid.NewGuid().ToString()
-                : dto.PassengerId,
+            PassengerId = string.IsNullOrEmpty(dto.PassengerId) ? Guid.NewGuid().ToString() : dto.PassengerId,
             PnrId = dto.PnrId,
             PaxNo = dto.PaxNo,
             LastName = dto.LastName,
@@ -169,8 +180,8 @@ public class PassengerController : ControllerBase
 
         _db.Passengers.Add(passenger);
         await _db.SaveChangesAsync();
+        _logger.LogInformation("Пассажир успешно создан с ID: {PassengerId}", passenger.PassengerId);
 
-        // Формируем DTO для возврата
         var resultDto = new PassengerDto
         {
             PassengerId = passenger.PassengerId,
@@ -215,8 +226,12 @@ public class PassengerController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string id, PassengerDto dto)
     {
+        _logger.LogInformation("Обновление пассажира с ID: {PassengerId}", id);
         if (id != dto.PassengerId)
+        {
+            _logger.LogWarning("Id из пути не совпадает с Id из тела запроса.");
             return BadRequest("Id не совпадает.");
+        }
 
         var passenger = await _db.Passengers
             .Include(p => p.Document)
@@ -224,13 +239,18 @@ public class PassengerController : ControllerBase
             .FirstOrDefaultAsync(p => p.PassengerId == id);
 
         if (passenger == null)
+        {
+            _logger.LogWarning("Пассажир с ID {PassengerId} не найден.", id);
             return NotFound();
+        }
 
         var booking = await _db.Bookings.FindAsync(dto.BookingId);
         if (booking == null)
+        {
+            _logger.LogWarning("Бронирование с ID {BookingId} не найдено.", dto.BookingId);
             return BadRequest($"Booking с Id {dto.BookingId} не найден.");
+        }
 
-        // Обновляем данные
         passenger.PnrId = dto.PnrId;
         passenger.PaxNo = dto.PaxNo;
         passenger.LastName = dto.LastName;
@@ -249,7 +269,6 @@ public class PassengerController : ControllerBase
         passenger.BookingId = dto.BookingId;
         passenger.Booking = booking;
 
-        // Обновляем документ
         passenger.Document.Type = dto.Document.Type;
         passenger.Document.IssueCountryCode = dto.Document.IssueCountryCode;
         passenger.Document.Number = dto.Document.Number;
@@ -257,7 +276,6 @@ public class PassengerController : ControllerBase
         passenger.Document.BirthDate = dto.Document.BirthDate;
         passenger.Document.ExpiryDate = dto.Document.ExpiryDate;
 
-        // Обновляем визу
         passenger.VisaDocument.BirthPlace = dto.VisaDocument.BirthPlace;
         passenger.VisaDocument.Number = dto.VisaDocument.Number;
         passenger.VisaDocument.IssuePlace = dto.VisaDocument.IssuePlace;
@@ -265,6 +283,7 @@ public class PassengerController : ControllerBase
         passenger.VisaDocument.ApplicCountryCode = dto.VisaDocument.ApplicCountryCode;
 
         await _db.SaveChangesAsync();
+        _logger.LogInformation("Пассажир с ID {PassengerId} успешно обновлён.", id);
 
         return NoContent();
     }
@@ -272,13 +291,18 @@ public class PassengerController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
+        _logger.LogInformation("Запрос на удаление пассажира с ID: {PassengerId}", id);
         var passenger = await _db.Passengers.FirstOrDefaultAsync(p => p.PassengerId == id);
         if (passenger == null)
+        {
+            _logger.LogWarning("Пассажир с ID {PassengerId} не найден для удаления.", id);
             return NotFound();
+        }
 
         _db.Passengers.Remove(passenger);
         await _db.SaveChangesAsync();
 
+        _logger.LogInformation("Пассажир с ID {PassengerId} успешно удалён.", id);
         return NoContent();
     }
 }
