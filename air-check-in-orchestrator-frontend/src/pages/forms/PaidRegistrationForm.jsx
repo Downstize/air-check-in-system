@@ -1,6 +1,6 @@
 import React from 'react';
 import { Form, Input, Button, Card, message } from 'antd';
-import { registerPaid } from '../api/api';
+import { registerPaid } from '../../api/api';
 import { motion } from 'framer-motion';
 
 const PaidRegistrationForm = ({ setCurrent }) => {

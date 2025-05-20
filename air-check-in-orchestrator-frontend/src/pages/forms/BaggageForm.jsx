@@ -1,5 +1,5 @@
 import { Form, Input, Button, Card, message } from 'antd';
-import { addBaggage } from '../api/api';
+import { addBaggage } from '../../api/api';
 import { motion } from 'framer-motion';
 
 const BaggageForm = ({ setCurrent }) => {

@@ -1,6 +1,6 @@
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
+import Login from './pages/auth/Login';
+import Dashboard from './pages/dashboard/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import 'antd/dist/reset.css';
 import { useState } from 'react';

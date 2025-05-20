@@ -1,22 +1,14 @@
-import { Navigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { Spin } from "antd";
 
 const ProtectedRoute = ({ children }) => {
-    const token = localStorage.getItem('token');
+  const { isAuthenticated } = useAuth();
 
-    if (!token) return <Navigate to="/login" />;
+  if (isAuthenticated === null) return <Spin size="large" fullscreen />;
 
-    try {
-        const { exp } = jwtDecode(token);
-        if (Date.now() >= exp * 1000) {
-            localStorage.removeItem('token');
-            return <Navigate to="/login" />;
-        }
-    } catch {
-        return <Navigate to="/login" />;
-    }
-
-    return children;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return children;
 };
 
 export default ProtectedRoute;

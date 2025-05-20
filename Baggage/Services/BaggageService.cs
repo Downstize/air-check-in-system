@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Baggage.Data;
 using Baggage.DTO;
 using Baggage.Models;
@@ -34,11 +35,11 @@ namespace Baggage.Services
             if (cached != null)
             {
                 _logger.LogInformation("Возвращаем Allowance из кэша: {CacheKey}", cacheKey);
-                return System.Text.Json.JsonSerializer.Deserialize<BaggageAllowanceDto>(cached)!;
+                return JsonSerializer.Deserialize<BaggageAllowanceDto>(cached)!;
             }
 
             _logger.LogInformation("Запрос Allowance из сервисов и БД: {OrderId}, {PassengerId}", orderId, passengerId);
-            
+
             await Task.Delay(300);
 
             var order = await _passengerSvc.GetOrderAsync(dynamicId, orderId, passengerId);
@@ -73,7 +74,7 @@ namespace Baggage.Services
                 PaidOptions = paid
             };
 
-            var serialized = System.Text.Json.JsonSerializer.Serialize(result);
+            var serialized = JsonSerializer.Serialize(result);
             await _cache.SetStringAsync(cacheKey, serialized, new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
@@ -161,9 +162,10 @@ namespace Baggage.Services
 
             _db.BaggageRegistrations.Add(reg);
             await _db.SaveChangesAsync();
-            
+
             await _cache.RemoveAsync($"allowance:{orderId}:{passengerId}");
-            _logger.LogInformation("Кэш Allowance сброшен после регистрации багажа: {CacheKey}", $"allowance:{orderId}:{passengerId}");
+            _logger.LogInformation("Кэш Allowance сброшен после регистрации багажа: {CacheKey}",
+                $"allowance:{orderId}:{passengerId}");
 
             _logger.LogInformation(
                 "Baggage/RegisterAsync: Багаж успешно зарегистрирован: RegistrationId={RegistrationId}",
@@ -210,9 +212,10 @@ namespace Baggage.Services
 
             _db.BaggageRegistrations.RemoveRange(regs);
             await _db.SaveChangesAsync();
-            
+
             await _cache.RemoveAsync($"allowance:{orderId}:{passengerId}");
-            _logger.LogInformation("Кэш Allowance сброшен после отмены багажа: {CacheKey}", $"allowance:{orderId}:{passengerId}");
+            _logger.LogInformation("Кэш Allowance сброшен после отмены багажа: {CacheKey}",
+                $"allowance:{orderId}:{passengerId}");
 
             _logger.LogInformation("Регистрация багажа отменена для PassengerId={PassengerId}", passengerId);
 
@@ -243,6 +246,304 @@ namespace Baggage.Services
                 "Baggage/SimulateBaggagePaymentAsync: Оплата багажа успешно симулирована для PassengerId={PassengerId}",
                 passengerId);
 
+            return true;
+        }
+
+        public async Task<BaggagePayment> CreatePaymentAsync(BaggagePayment payment)
+        {
+            payment.PaymentId = Guid.NewGuid().ToString();
+            _logger.LogInformation(
+                "ADMIN (BaggageService): Создание оплаты — PassengerId={PassengerId}, Amount={Amount}",
+                payment.PassengerId, payment.Amount);
+            _db.BaggagePayment.Add(payment);
+            await _db.SaveChangesAsync();
+            await _cache.RemoveAsync("payments:all");
+            await _cache.RemoveAsync($"payment:{payment.PaymentId}");
+            _logger.LogInformation("ADMIN (BaggageService): Оплата создана — PaymentId={PaymentId}", payment.PaymentId);
+            return payment;
+        }
+
+        public async Task<IEnumerable<BaggagePayment>> GetAllPaymentsAsync()
+        {
+            const string cacheKey = "payments:all";
+            var cached = await _cache.GetStringAsync(cacheKey);
+            if (cached != null)
+            {
+                _logger.LogInformation("ADMIN (BaggageService): Получение всех оплат из кэша");
+                return JsonSerializer.Deserialize<IEnumerable<BaggagePayment>>(cached)!;
+            }
+            
+            await Task.Delay(300);
+
+            _logger.LogInformation("Запрос всех оплат из БД");
+            var payments = await _db.BaggagePayment.ToListAsync();
+            var serialized = JsonSerializer.Serialize(payments);
+            await _cache.SetStringAsync(cacheKey, serialized, new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
+            return payments;
+        }
+
+        public async Task<BaggagePayment?> GetPaymentByIdAsync(string id)
+        {
+            var cacheKey = $"payment:{id}";
+            var cached = await _cache.GetStringAsync(cacheKey);
+            if (cached != null)
+            {
+                _logger.LogInformation("ADMIN (BaggageService): Оплата найдена в кэше: {PaymentId}", id);
+                return JsonSerializer.Deserialize<BaggagePayment>(cached)!;
+            }
+            
+            await Task.Delay(300);
+
+            _logger.LogInformation("ADMIN (BaggageService): Получение оплаты по ID — PaymentId={PaymentId}", id);
+            
+            var payment = await _db.BaggagePayment.FindAsync(id);
+            if (payment != null)
+            {
+                var serialized = JsonSerializer.Serialize(payment);
+                await _cache.SetStringAsync(cacheKey, serialized, new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                });
+            }
+
+            return payment;
+        }
+
+        public async Task<bool> UpdatePaymentAsync(string id, BaggagePayment updated)
+        {
+            _logger.LogInformation("ADMIN (BaggageService): Обновление оплаты — PaymentId={PaymentId}", id);
+            var existing = await _db.BaggagePayment.FindAsync(id);
+            if (existing == null)
+            {
+                _logger.LogWarning("ADMIN (BaggageService): Оплата не найдена — PaymentId={PaymentId}", id);
+                return false;
+            }
+
+            updated.PaymentId = id;
+            _db.Entry(existing).CurrentValues.SetValues(updated);
+            await _db.SaveChangesAsync();
+            await _cache.RemoveAsync("payments:all");
+            await _cache.RemoveAsync($"payment:{updated.PaymentId}");
+            _logger.LogInformation("ADMIN (BaggageService): Оплата успешно обновлена — PaymentId={PaymentId}", id);
+            return true;
+        }
+
+        public async Task<bool> DeletePaymentAsync(string id)
+        {
+            _logger.LogInformation("ADMIN (BaggageService): Удаление оплаты — PaymentId={PaymentId}", id);
+            var existing = await _db.BaggagePayment.FindAsync(id);
+            if (existing == null)
+            {
+                _logger.LogWarning("ADMIN (BaggageService): Оплата не найдена для удаления — PaymentId={PaymentId}",
+                    id);
+                return false;
+            }
+
+            _db.BaggagePayment.Remove(existing);
+            await _db.SaveChangesAsync();
+            await _cache.RemoveAsync("payments:all");
+            await _cache.RemoveAsync($"payment:{existing.PaymentId}");
+            _logger.LogInformation("ADMIN (BaggageService): Оплата успешно удалена — PaymentId={PaymentId}", id);
+            return true;
+        }
+
+        public async Task<BaggageRegistration> CreateRegistrationAsync(BaggageRegistration reg)
+        {
+            reg.RegistrationId = Guid.NewGuid().ToString();
+            reg.Timestamp = DateTime.UtcNow;
+            _logger.LogInformation(
+                "ADMIN (BaggageService): Создание регистрации — PassengerId={PassengerId}, Pieces={Pieces}",
+                reg.PassengerId, reg.Pieces);
+            _db.BaggageRegistrations.Add(reg);
+            await _db.SaveChangesAsync();
+            await _cache.RemoveAsync("registrations:all");
+            await _cache.RemoveAsync($"registration:{reg.RegistrationId}");
+            _logger.LogInformation("ADMIN (BaggageService): Регистрация создана — RegistrationId={RegistrationId}",
+                reg.RegistrationId);
+            return reg;
+        }
+
+        public async Task<IEnumerable<BaggageRegistration>> GetAllRegistrationsAsync()
+        {
+            const string cacheKey = "registrations:all";
+            var cached = await _cache.GetStringAsync(cacheKey);
+            if (cached != null)
+            {
+                _logger.LogInformation("ADMIN (BaggageService): Получение всех регистраций из кэша");
+                return JsonSerializer.Deserialize<IEnumerable<BaggageRegistration>>(cached)!;
+            }
+            
+            await Task.Delay(300);
+
+            _logger.LogInformation("ADMIN (BaggageService): Получение всех регистраций");
+            
+            var regs = await _db.BaggageRegistrations.ToListAsync();
+            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(regs),
+                new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) });
+            return regs;
+        }
+
+        public async Task<BaggageRegistration?> GetRegistrationByIdAsync(string id)
+        {
+            var cacheKey = $"registration:{id}";
+            var cached = await _cache.GetStringAsync(cacheKey);
+            if (cached != null)
+            {
+                _logger.LogInformation(
+                    "ADMIN (BaggageService): Получение регистрации по ID — RegistrationId={RegistrationId} из кэша", id);
+                return JsonSerializer.Deserialize<BaggageRegistration>(cached)!;
+            }
+            
+            await Task.Delay(300);
+
+            _logger.LogInformation(
+                "ADMIN (BaggageService): Получение регистрации по ID — RegistrationId={RegistrationId}", id);
+            
+            var reg = await _db.BaggageRegistrations.FindAsync(id);
+            if (reg != null)
+                await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(reg),
+                    new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) });
+            return reg;
+        }
+
+        public async Task<bool> UpdateRegistrationAsync(string id, BaggageRegistration updated)
+        {
+            _logger.LogInformation("ADMIN (BaggageService): Обновление регистрации — RegistrationId={RegistrationId}",
+                id);
+            var existing = await _db.BaggageRegistrations.FindAsync(id);
+            if (existing == null)
+            {
+                _logger.LogWarning("ADMIN (BaggageService): Регистрация не найдена — RegistrationId={RegistrationId}",
+                    id);
+                return false;
+            }
+
+            updated.RegistrationId = id;
+            _db.Entry(existing).CurrentValues.SetValues(updated);
+            await _db.SaveChangesAsync();
+            await _cache.RemoveAsync("registrations:all");
+            await _cache.RemoveAsync($"registration:{id}");
+            _logger.LogInformation(
+                "ADMIN (BaggageService): Регистрация успешно обновлена — RegistrationId={RegistrationId}", id);
+            return true;
+        }
+
+        public async Task<bool> DeleteRegistrationAsync(string id)
+        {
+            _logger.LogInformation("ADMIN (BaggageService): Удаление регистрации — RegistrationId={RegistrationId}",
+                id);
+            var existing = await _db.BaggageRegistrations.FindAsync(id);
+            if (existing == null)
+            {
+                _logger.LogWarning(
+                    "ADMIN (BaggageService): Регистрация не найдена для удаления — RegistrationId={RegistrationId}",
+                    id);
+                return false;
+            }
+
+            _db.BaggageRegistrations.Remove(existing);
+            await _db.SaveChangesAsync();
+            await _cache.RemoveAsync("registrations:all");
+            await _cache.RemoveAsync($"registration:{id}");
+            _logger.LogInformation(
+                "ADMIN (BaggageService): Регистрация успешно удалена — RegistrationId={RegistrationId}", id);
+            return true;
+        }
+
+        public async Task<PaidOption> CreatePaidOptionAsync(PaidOption option)
+        {
+            option.PaidOptionId = Guid.NewGuid().ToString();
+            _logger.LogInformation(
+                "ADMIN (BaggageService): Создание платной опции — Pieces={Pieces}, WeightKg={WeightKg}, Price={Price}",
+                option.Pieces, option.WeightKg, option.Price);
+            _db.PaidOptions.Add(option);
+            await _db.SaveChangesAsync();
+            await _cache.RemoveAsync("paidoptions:all");
+            await _cache.RemoveAsync($"paidoption:{option.PaidOptionId}");
+            _logger.LogInformation("ADMIN (BaggageService): Опция создана — PaidOptionId={PaidOptionId}",
+                option.PaidOptionId);
+            return option;
+        }
+
+        public async Task<IEnumerable<PaidOption>> GetAllPaidOptionsAsync()
+        {
+            const string cacheKey = "paidoptions:all";
+            var cached = await _cache.GetStringAsync(cacheKey);
+            if (cached != null)
+            {
+                _logger.LogInformation("ADMIN (BaggageService): Получение всех платных опций из кэша");
+                return JsonSerializer.Deserialize<IEnumerable<PaidOption>>(cached)!;
+            }
+            
+            await Task.Delay(300);
+
+            _logger.LogInformation("ADMIN (BaggageService): Получение всех платных опций");
+            
+            var options = await _db.PaidOptions.ToListAsync();
+            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(options),
+                new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) });
+            return options;
+        }
+
+        public async Task<PaidOption?> GetPaidOptionByIdAsync(string id)
+        {
+            var cacheKey = $"paidoption:{id}";
+            var cached = await _cache.GetStringAsync(cacheKey);
+            if (cached != null)
+            {
+                _logger.LogInformation("ADMIN (BaggageService): Получение опции по ID — PaidOptionId={PaidOptionId} из кэша", id);
+                return JsonSerializer.Deserialize<PaidOption>(cached)!;
+            }
+            
+            await Task.Delay(300);
+
+            _logger.LogInformation("ADMIN (BaggageService): Получение опции по ID — PaidOptionId={PaidOptionId}", id);
+            
+            var option = await _db.PaidOptions.FindAsync(id);
+            if (option != null)
+                await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(option),
+                    new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) });
+            return option;
+        }
+
+        public async Task<bool> UpdatePaidOptionAsync(string id, PaidOption updated)
+        {
+            _logger.LogInformation("ADMIN (BaggageService): Обновление опции — PaidOptionId={PaidOptionId}", id);
+            var existing = await _db.PaidOptions.FindAsync(id);
+            if (existing == null)
+            {
+                _logger.LogWarning("ADMIN (BaggageService): Опция не найдена — PaidOptionId={PaidOptionId}", id);
+                return false;
+            }
+
+            updated.PaidOptionId = id;
+            _db.Entry(existing).CurrentValues.SetValues(updated);
+            await _db.SaveChangesAsync();
+            await _cache.RemoveAsync("paidoptions:all");
+            await _cache.RemoveAsync($"paidoption:{id}");
+            _logger.LogInformation("ADMIN (BaggageService): Опция успешно обновлена — PaidOptionId={PaidOptionId}", id);
+            return true;
+        }
+
+        public async Task<bool> DeletePaidOptionAsync(string id)
+        {
+            _logger.LogInformation("ADMIN (BaggageService): Удаление платной опции — PaidOptionId={PaidOptionId}", id);
+            var existing = await _db.PaidOptions.FindAsync(id);
+            if (existing == null)
+            {
+                _logger.LogWarning(
+                    "ADMIN (BaggageService): Опция не найдена для удаления — PaidOptionId={PaidOptionId}", id);
+                return false;
+            }
+
+            _db.PaidOptions.Remove(existing);
+            await _db.SaveChangesAsync();
+            await _cache.RemoveAsync("paidoptions:all");
+            await _cache.RemoveAsync($"paidoption:{id}");
+            _logger.LogInformation("ADMIN (BaggageService): Опция успешно удалена — PaidOptionId={PaidOptionId}", id);
             return true;
         }
     }

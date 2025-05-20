@@ -132,7 +132,7 @@ public class PassengerController : ControllerBase
     public async Task<IActionResult> Create(PassengerDto dto)
     {
         _logger.LogInformation("Создание нового пассажира.");
-        var booking = await _db.Bookings.FindAsync(dto.BookingId);
+        var booking = await _db.Bookings.FindAsync(dto.BookingId); //Написана херня, переделать!!!
         if (booking == null)
         {
             _logger.LogWarning("Бронирование с ID {BookingId} не найдено.", dto.BookingId);

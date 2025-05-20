@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using MassTransit;
 using Shared.Messages;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -41,7 +42,8 @@ builder.Services.AddAuthentication(options =>
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             ValidIssuer = issuer,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+            RoleClaimType = ClaimTypes.Role
         };
     });
 
@@ -66,6 +68,11 @@ builder.Services.AddCors(options =>
         policy => policy.WithOrigins(
                 "http://grafana:3000",
                 "http://localhost:8080",
+                "http://localhost:8081",
+                "http://localhost:8082",
+                "http://localhost:8083",
+                "http://localhost:8084",
+                "http://localhost:3000",
                 "http://localhost:3002")
             .AllowAnyHeader()
             .AllowAnyMethod());

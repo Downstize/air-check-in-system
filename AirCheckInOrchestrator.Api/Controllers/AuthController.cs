@@ -40,7 +40,8 @@ public class AuthController : ControllerBase
 
         var claims = new[]
         {
-            new Claim(ClaimTypes.Name, username)
+            new Claim(ClaimTypes.Name, username),
+            new Claim(ClaimTypes.Role, "admin")
         };
 
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));

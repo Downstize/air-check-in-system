@@ -13,12 +13,12 @@ public class PassengerDto
     public string? Reason { get; set; }
     public int SeatsOccupied { get; set; }
     public bool Eticket { get; set; }
-    public PassengerDocumentDto Document { get; set; }
-    public PassengerVisaDocumentDto VisaDocument { get; set; }
+    public PassengerDocumentDto? Document { get; set; }
+    public PassengerVisaDocumentDto? VisaDocument { get; set; }
     public string SeatNumber { get; set; }
     public string SeatStatus { get; set; }
     public string SeatLayerType { get; set; }
-    public List<string> Remarks { get; set; }
+    public List<string>? Remarks { get; set; }
     public int Apis { get; set; }
     public int BookingId { get; set; }
 }

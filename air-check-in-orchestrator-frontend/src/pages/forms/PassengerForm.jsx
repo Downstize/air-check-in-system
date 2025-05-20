@@ -1,5 +1,5 @@
 import { Form, Input, Button, Checkbox, Card, message } from 'antd';
-import { checkInPassenger } from '../api/api';
+import { checkInPassenger } from '../../api/api';
 import { motion } from 'framer-motion';
 
 const PassengerForm = ({ setCurrent }) => {

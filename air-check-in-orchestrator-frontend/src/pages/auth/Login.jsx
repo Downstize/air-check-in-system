@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { Button, Form, Input, Card, message } from 'antd';
-import { login } from '../api/api';
+import { login } from '../../api/api';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { login: setAuthToken } = useAuth();
 
     const onFinish = async (values) => {
         setLoading(true);
         try {
             const res = await login(values.username, values.password);
-            localStorage.setItem('token', res.data.token);
+            setAuthToken(res.data.token);
             navigate('/');
         } catch {
             message.error('Неверный логин или пароль');

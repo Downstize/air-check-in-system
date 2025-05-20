@@ -7,10 +7,10 @@ namespace SessionService.Controllers;
 [Route("api/[controller]")]
 public class SessionController : ControllerBase
 {
-    private readonly ISessionService _svc;
+    private readonly ISessionsService _svc;
     private readonly ILogger<SessionController> _logger;
 
-    public SessionController(ISessionService svc, ILogger<SessionController> logger)
+    public SessionController(ISessionsService svc, ILogger<SessionController> logger)
     {
         _svc = svc;
         _logger = logger;

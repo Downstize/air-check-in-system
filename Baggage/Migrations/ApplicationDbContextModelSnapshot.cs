@@ -24,11 +24,8 @@ namespace Baggage.Migrations
 
             modelBuilder.Entity("Baggage.Models.BaggagePayment", b =>
                 {
-                    b.Property<int>("PaymentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PaymentId"));
+                    b.Property<string>("PaymentId")
+                        .HasColumnType("text");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric");
@@ -96,11 +93,8 @@ namespace Baggage.Migrations
 
             modelBuilder.Entity("Baggage.Models.PaidOption", b =>
                 {
-                    b.Property<int>("PaidOptionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PaidOptionId"));
+                    b.Property<string>("PaidOptionId")
+                        .HasColumnType("text");
 
                     b.Property<int>("Pieces")
                         .HasColumnType("integer");
