@@ -232,6 +232,7 @@ namespace Baggage.Services
 
             var payment = new BaggagePayment
             {
+                PaymentId = Guid.NewGuid().ToString(),
                 DynamicId = dynamicId,
                 PassengerId = passengerId,
                 DepartureId = departureId,

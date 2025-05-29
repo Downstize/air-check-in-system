@@ -129,7 +129,7 @@ namespace Registration.Services
             _logger.LogInformation("Платная регистрация пассажира: PassengerId={PassengerId}", req.PassengerId);
             return await RegisterAsync(req.DynamicId, req.DepartureId, req.PassengerId, req.SeatNumber, true);
         }
-
+        //Добавить исключение на то, что пассажир не зареган
         private async Task<RegistrationPassengerResponseDto> RegisterAsync(
             string dynamicId, string departureId, string passengerId, string seatNumber, bool paid)
         {

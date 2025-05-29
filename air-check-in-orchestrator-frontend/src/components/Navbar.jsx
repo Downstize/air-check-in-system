@@ -97,12 +97,6 @@ const Navbar = ({ current, setCurrent }) => {
           onClick: () => setCurrent("authenticate"),
         },
         {
-          key: "simulatePayment",
-          icon: <CreditCardOutlined />,
-          label: "Сим. оплата",
-          onClick: () => setCurrent("simulatePayment"),
-        },
-        {
           key: "simulateBaggagePayment",
           icon: <ShoppingOutlined />,
           label: "Сим. оплата багажа",

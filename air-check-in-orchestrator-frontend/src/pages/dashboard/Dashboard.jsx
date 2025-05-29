@@ -19,7 +19,6 @@ import AdminRegistrations from "../admin/registrations/AdminRegistrations";
 import AdminReservations from "../admin/reservations/AdminReservations";
 import AdminSessions from "../admin/sessions/AdminSessions";
 import Authentication from "../forms/Authentication";
-import SimulatePayment from "../operations/SimulatePayment";
 import SimulateBaggagePayment from "../operations/SimulateBaggagePayment";
 import Allowance from "../operations/Allowance";
 import RegisterBaggage from "../forms/RegisterBaggage";
@@ -121,7 +120,6 @@ const Dashboard = ({ current, setCurrent }) => {
       {current === "adminReservations" && <AdminReservations />}
       {current === "adminSessions" && <AdminSessions />}
       {current === "authenticate" && <Authentication setCurrent={setCurrent} />}
-      {current === "simulatePayment" && <SimulatePayment />}
       {current === "simulateBaggagePayment" && <SimulateBaggagePayment />}
       {current === "getAllowance" && <Allowance />}
       {current === "registerBaggage" && <RegisterBaggage />}

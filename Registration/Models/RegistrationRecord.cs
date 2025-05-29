@@ -10,3 +10,5 @@ public class RegistrationRecord
     public bool   IsPaid            { get; set; }
     public DateTime RegisteredAt    { get; set; }
 }
+
+
