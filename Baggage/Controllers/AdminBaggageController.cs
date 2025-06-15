@@ -34,7 +34,7 @@ namespace Baggage.Controllers
         {
             _logger.LogInformation("ADMIN: Получение всех оплат за багаж");
             return Ok(await _svc.GetAllPaymentsAsync());
-        } // работает
+        }
 
         [HttpGet("payments/{id}")]
         public async Task<ActionResult<BaggagePayment>> GetPaymentById(string id)
@@ -89,7 +89,7 @@ namespace Baggage.Controllers
         {
             _logger.LogInformation("ADMIN: Получение всех регистраций багажа");
             return Ok(await _svc.GetAllRegistrationsAsync());
-        } // работает
+        }
 
         [HttpGet("registrations/{id}")]
         public async Task<ActionResult<BaggageRegistration>> GetRegistrationById(string id)

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card } from "antd";
+import { Card, Tooltip } from "antd";
 import { motion } from "framer-motion";
 import Navbar from "../../components/Navbar";
 import PassengerForm from "../forms/PassengerForm";
@@ -28,9 +28,7 @@ const Dashboard = ({ current, setCurrent }) => {
   const [stats, setStats] = useState({ checkIns: 0, baggage: 0 });
 
   useEffect(() => {
-    if (current === "home") {
-      fetchMetrics().then(setStats);
-    }
+    if (current === "home") fetchMetrics().then(setStats);
   }, [current]);
 
   async function fetchMetrics() {
@@ -40,15 +38,16 @@ const Dashboard = ({ current, setCurrent }) => {
     const checkInsMatch = text.match(/passenger_checkins_total\s+(\d+)/);
     const baggageMatch = text.match(/baggage_registrations_total\s+(\d+)/);
 
-    const checkIns = checkInsMatch ? parseInt(checkInsMatch[1], 10) : 0;
-    const baggage = baggageMatch ? parseInt(baggageMatch[1], 10) : 0;
-
-    return { checkIns, baggage };
+    return {
+      checkIns: checkInsMatch ? parseInt(checkInsMatch[1], 10) : 0,
+      baggage: baggageMatch ? parseInt(baggageMatch[1], 10) : 0,
+    };
   }
 
   return (
     <>
       <Navbar current={current} setCurrent={setCurrent} />
+
       {current === "home" && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <Card
@@ -76,27 +75,33 @@ const Dashboard = ({ current, setCurrent }) => {
               marginTop: "20px",
             }}
           >
-            <Card
-              title="Регистраций сегодня"
-              style={{ width: 220 }}
-              bordered={false}
-            >
-              <p style={{ fontSize: "24px", textAlign: "center" }}>
-                {stats.checkIns}
-              </p>
-            </Card>
-            <Card
-              title="Багажа оформлено"
-              style={{ width: 220 }}
-              bordered={false}
-            >
-              <p style={{ fontSize: "24px", textAlign: "center" }}>
-                {stats.baggage}
-              </p>
-            </Card>
+            <Tooltip title="Количество регистраций пассажиров за сегодня">
+              <Card
+                title="Регистраций сегодня"
+                style={{ width: 220 }}
+                bordered={false}
+              >
+                <p style={{ fontSize: "24px", textAlign: "center" }}>
+                  {stats.checkIns}
+                </p>
+              </Card>
+            </Tooltip>
+
+            <Tooltip title="Общее число оформленного багажа за сегодня">
+              <Card
+                title="Багажа оформлено"
+                style={{ width: 220 }}
+                bordered={false}
+              >
+                <p style={{ fontSize: "24px", textAlign: "center" }}>
+                  {stats.baggage}
+                </p>
+              </Card>
+            </Tooltip>
           </div>
         </motion.div>
       )}
+
       {current === "passenger" && <PassengerForm setCurrent={setCurrent} />}
       {current === "baggage" && <BaggageForm setCurrent={setCurrent} />}
       {current === "searchOrder" && <OrderSearchForm setCurrent={setCurrent} />}

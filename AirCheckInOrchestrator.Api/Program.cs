@@ -11,8 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog();
 
-// builder.WebHost.UseUrls("http://localhost:5003");
-
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var key = jwtSettings["Key"] ?? throw new Exception("JwtSettings:Key не задан");
 var issuer = jwtSettings["Issuer"] ?? throw new Exception("JwtSettings:Issuer не задан");

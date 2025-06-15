@@ -1,5 +1,4 @@
-import React from "react";
-import { Menu, ConfigProvider } from "antd";
+import { Menu, ConfigProvider, Tooltip } from "antd";
 import { motion } from "framer-motion";
 import {
   HomeOutlined,
@@ -14,9 +13,43 @@ import {
   ToolOutlined,
   DollarOutlined,
   DatabaseOutlined,
+  InfoCircleOutlined,
 } from "@ant-design/icons";
 
 const Navbar = ({ current, setCurrent }) => {
+  const tooltips = {
+    home: "Перейти на главную страницу",
+    passenger: "Регистрация пассажира по DynamicId и PNR",
+    baggage: "Регистрация багажа к выбранному пассажиру",
+    searchOrder: "Поиск заказа по PNR",
+    reserveSeat: "Резерв места на рейс",
+    registerFree: "Бесплатная регистрация пассажира",
+    registerPaid: "Платная регистрация пассажира",
+    adminPayments: "Просмотр и управление оплатами",
+    adminRegistrations: "Управление регистрациями пассажиров",
+    adminReservations: "Управление резервами мест",
+    authenticate: "Аутентификация в системе регистрации",
+    simulateBaggagePayment: "Смоделировать оплату багажа",
+    getAllowance: "Получить норму провоза багажа",
+    registerBaggage: "Регистрация багажа",
+    cancelBaggage: "Отмена регистрации багажа",
+    passengers: "Список пассажиров",
+    adminPassengers: "Администрирование пассажиров",
+    session: "Работа с DynamicId сессий",
+    adminSessions: "Администрирование сессий",
+    adminBaggageRegistrations: "Просмотр регистраций багажа",
+    adminBaggagePayments: "Просмотр и управление оплатами багажа",
+    adminBaggageOptions: "Управление опциями багажа",
+  };
+
+  const wrapWithTooltip = (key, content) => (
+    <Tooltip title={tooltips[key] || ""}>
+      <span>
+        {content} <InfoCircleOutlined style={{ marginLeft: 4 }} />
+      </span>
+    </Tooltip>
+  );
+
   const items = [
     {
       key: "home",
@@ -26,161 +59,167 @@ const Navbar = ({ current, setCurrent }) => {
     },
     {
       key: "orchestrator",
-      label: "Оркестратор",
       icon: <DatabaseOutlined />,
+      label: "Оркестратор",
       children: [
         {
           key: "passenger",
           icon: <UserOutlined />,
-          label: "Регистрация пассажира",
+          label: wrapWithTooltip("passenger", "Регистрация пассажира"),
           onClick: () => setCurrent("passenger"),
         },
         {
           key: "baggage",
           icon: <ShoppingOutlined />,
-          label: "Регистрация багажа",
+          label: wrapWithTooltip("baggage", "Регистрация багажа"),
           onClick: () => setCurrent("baggage"),
         },
       ],
     },
     {
       key: "registration",
-      label: "Регистрация",
       icon: <CheckCircleOutlined />,
+      label: "Регистрация",
       children: [
         {
           key: "searchOrder",
           icon: <SearchOutlined />,
-          label: "Поиск заказа",
+          label: wrapWithTooltip("searchOrder", "Поиск заказа"),
           onClick: () => setCurrent("searchOrder"),
         },
         {
           key: "reserveSeat",
           icon: <AppstoreAddOutlined />,
-          label: "Резерв места",
+          label: wrapWithTooltip("reserveSeat", "Резерв места"),
           onClick: () => setCurrent("reserveSeat"),
         },
         {
           key: "registerFree",
           icon: <CheckCircleOutlined />,
-          label: "Бесплатная регистрация",
+          label: wrapWithTooltip("registerFree", "Бесплатная регистрация"),
           onClick: () => setCurrent("registerFree"),
         },
         {
           key: "registerPaid",
           icon: <CreditCardOutlined />,
-          label: "Платная регистрация",
+          label: wrapWithTooltip("registerPaid", "Платная регистрация"),
           onClick: () => setCurrent("registerPaid"),
         },
         {
           key: "adminPayments",
           icon: <DollarOutlined />,
-          label: "Админ оплаты",
+          label: wrapWithTooltip("adminPayments", "Админ оплаты"),
           onClick: () => setCurrent("adminPayments"),
         },
         {
           key: "adminRegistrations",
           icon: <DatabaseOutlined />,
-          label: "Админ регистрации",
+          label: wrapWithTooltip("adminRegistrations", "Админ регистрации"),
           onClick: () => setCurrent("adminRegistrations"),
         },
         {
           key: "adminReservations",
           icon: <AppstoreAddOutlined />,
-          label: "Админ резервы",
+          label: wrapWithTooltip("adminReservations", "Админ резервы"),
           onClick: () => setCurrent("adminReservations"),
         },
         {
           key: "authenticate",
           icon: <LockOutlined />,
-          label: "Аутентификация",
+          label: wrapWithTooltip("authenticate", "Аутентификация"),
           onClick: () => setCurrent("authenticate"),
         },
         {
           key: "simulateBaggagePayment",
           icon: <ShoppingOutlined />,
-          label: "Сим. оплата багажа",
+          label: wrapWithTooltip(
+            "simulateBaggagePayment",
+            "Сим. оплата багажа"
+          ),
           onClick: () => setCurrent("simulateBaggagePayment"),
         },
         {
           key: "getAllowance",
           icon: <DatabaseOutlined />,
-          label: "Получить норму",
+          label: wrapWithTooltip("getAllowance", "Получить норму"),
           onClick: () => setCurrent("getAllowance"),
         },
         {
           key: "registerBaggage",
           icon: <ShoppingOutlined />,
-          label: "Рег. багажа",
+          label: wrapWithTooltip("registerBaggage", "Рег. багажа"),
           onClick: () => setCurrent("registerBaggage"),
         },
         {
           key: "cancelBaggage",
           icon: <ToolOutlined />,
-          label: "Отмена багажа",
+          label: wrapWithTooltip("cancelBaggage", "Отмена багажа"),
           onClick: () => setCurrent("cancelBaggage"),
         },
       ],
     },
     {
       key: "passengerService",
-      label: "Пассажиры",
       icon: <TeamOutlined />,
+      label: "Пассажиры",
       children: [
         {
           key: "passengers",
           icon: <TeamOutlined />,
-          label: "Список пассажиров",
+          label: wrapWithTooltip("passengers", "Список пассажиров"),
           onClick: () => setCurrent("passengers"),
         },
         {
           key: "adminPassengers",
           icon: <TeamOutlined />,
-          label: "Админ пассажиры",
+          label: wrapWithTooltip("adminPassengers", "Админ пассажиры"),
           onClick: () => setCurrent("adminPassengers"),
         },
       ],
     },
     {
       key: "sessionService",
-      label: "Сессии",
       icon: <LockOutlined />,
+      label: "Сессии",
       children: [
         {
           key: "session",
           icon: <LockOutlined />,
-          label: "Работа с DynamicId",
+          label: wrapWithTooltip("session", "Работа с DynamicId"),
           onClick: () => setCurrent("session"),
         },
         {
           key: "adminSessions",
           icon: <LockOutlined />,
-          label: "Админ сессии",
+          label: wrapWithTooltip("adminSessions", "Админ сессии"),
           onClick: () => setCurrent("adminSessions"),
         },
       ],
     },
     {
       key: "baggageService",
-      label: "Багаж",
       icon: <ShoppingOutlined />,
+      label: "Багаж",
       children: [
         {
           key: "adminBaggageRegistrations",
           icon: <DatabaseOutlined />,
-          label: "Регистрации багажа",
+          label: wrapWithTooltip(
+            "adminBaggageRegistrations",
+            "Регистрации багажа"
+          ),
           onClick: () => setCurrent("adminBaggageRegistrations"),
         },
         {
           key: "adminBaggagePayments",
           icon: <DollarOutlined />,
-          label: "Оплаты багажа",
+          label: wrapWithTooltip("adminBaggagePayments", "Оплаты багажа"),
           onClick: () => setCurrent("adminBaggagePayments"),
         },
         {
           key: "adminBaggageOptions",
           icon: <ToolOutlined />,
-          label: "Опции багажа",
+          label: wrapWithTooltip("adminBaggageOptions", "Опции багажа"),
           onClick: () => setCurrent("adminBaggageOptions"),
         },
       ],
@@ -226,16 +265,20 @@ const Navbar = ({ current, setCurrent }) => {
             alignItems: "center",
           }}
         >
+          {}
           <div
             style={{
               color: "#fff",
               fontSize: "20px",
               fontWeight: "bold",
               marginRight: "40px",
+              cursor: "pointer",
             }}
+            onClick={() => setCurrent("home")}
           >
             ✈ Air Check Admin
           </div>
+
           <Menu
             mode="horizontal"
             theme="dark"
@@ -245,10 +288,8 @@ const Navbar = ({ current, setCurrent }) => {
               flexGrow: 1,
               fontSize: "15px",
               fontWeight: 500,
-              maxHeight: "100%",
               overflow: "visible",
             }}
-            popupClassName="custom-submenu"
           />
         </div>
       </motion.div>

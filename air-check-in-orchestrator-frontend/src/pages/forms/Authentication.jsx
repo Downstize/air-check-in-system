@@ -40,11 +40,17 @@ const Authentication = ({ setCurrent }) => {
   return (
     <Card title="Аутентификация" style={{ maxWidth: 450, margin: "40px auto" }}>
       <Form onFinish={onFinish} layout="vertical">
-        <Form.Item name="login" label="Логин" rules={[{ required: true, message: "Введите логин" }]}
+        <Form.Item
+          name="login"
+          label="Логин"
+          rules={[{ required: true, message: "Введите логин" }]}
         >
           <Input />
         </Form.Item>
-        <Form.Item name="pwd" label="Пароль" rules={[{ required: true, message: "Введите пароль" }]}
+        <Form.Item
+          name="pwd"
+          label="Пароль"
+          rules={[{ required: true, message: "Введите пароль" }]}
         >
           <Input.Password />
         </Form.Item>
@@ -58,7 +64,10 @@ const Authentication = ({ setCurrent }) => {
       {dynamicId && (
         <Space direction="vertical" style={{ marginTop: 24 }}>
           <Text strong>Ваш Dynamic ID:</Text>
-          <Card size="small" style={{ background: "#f6ffed", borderColor: "#b7eb8f" }}>
+          <Card
+            size="small"
+            style={{ background: "#f6ffed", borderColor: "#b7eb8f" }}
+          >
             <Space>
               <Text code>{dynamicId}</Text>
               <Button type="link" icon={<CopyOutlined />} onClick={handleCopy}>

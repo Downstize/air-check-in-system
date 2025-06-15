@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using PassengerService.Data;
 using PassengerService.Models;
 using Shared.Contracts;
@@ -132,7 +131,7 @@ public class PassengerController : ControllerBase
     public async Task<IActionResult> Create(PassengerDto dto)
     {
         _logger.LogInformation("Создание нового пассажира.");
-        var booking = await _db.Bookings.FindAsync(dto.BookingId); //Написана херня, переделать!!!
+        var booking = await _db.Bookings.FindAsync(dto.BookingId);
         if (booking == null)
         {
             _logger.LogWarning("Бронирование с ID {BookingId} не найдено.", dto.BookingId);

@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PassengerService.Data;
-using PassengerService.Models;
 using PassengerService.Services;
 using Shared.Contracts;
 

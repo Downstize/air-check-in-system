@@ -1,11 +1,10 @@
 using PassengerService.Data;
 using Shared.Contracts;
 using Shared.Messages;
-
-namespace PassengerService.Consumers;
-
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+
+namespace PassengerService.Consumers;
 
 
 public class GetOrderConsumer : IConsumer<GetOrderRequest>

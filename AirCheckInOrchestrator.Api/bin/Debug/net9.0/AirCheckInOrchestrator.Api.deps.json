@@ -8,7 +8,6 @@
     ".NETCoreApp,Version=v9.0": {
       "AirCheckInOrchestrator.Api/1.0.0": {
         "dependencies": {
-          "Baggage": "1.0.0",
           "MassTransit": "8.4.0",
           "MassTransit.AspNetCore": "7.3.1",
           "MassTransit.RabbitMQ": "8.4.0",
@@ -17,10 +16,10 @@
           "Microsoft.EntityFrameworkCore": "9.0.4",
           "Microsoft.EntityFrameworkCore.Design": "9.0.4",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "9.0.4",
-          "Registration": "1.0.0",
           "Serilog.AspNetCore": "9.0.0",
           "Serilog.Sinks.Console": "6.0.0",
           "Serilog.Sinks.Elasticsearch": "10.0.0",
+          "Shared": "1.0.0",
           "Swashbuckle.AspNetCore": "8.1.1",
           "prometheus-net.AspNetCore": "8.2.1"
         },
@@ -1070,48 +1069,6 @@
       },
       "System.Threading.Channels/8.0.0": {},
       "System.Threading.RateLimiting/8.0.0": {},
-      "Baggage/1.0.0": {
-        "dependencies": {
-          "MassTransit": "8.4.0",
-          "MassTransit.AspNetCore": "7.3.1",
-          "MassTransit.RabbitMQ": "8.4.0",
-          "Microsoft.AspNetCore.OpenApi": "9.0.3",
-          "Microsoft.EntityFrameworkCore": "9.0.4",
-          "Npgsql.EntityFrameworkCore.PostgreSQL": "9.0.4",
-          "Serilog.AspNetCore": "9.0.0",
-          "Serilog.Sinks.Console": "6.0.0",
-          "Serilog.Sinks.Elasticsearch": "10.0.0",
-          "Shared": "1.0.0",
-          "Swashbuckle.AspNetCore": "8.1.1"
-        },
-        "runtime": {
-          "Baggage.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
-          }
-        }
-      },
-      "Registration/1.0.0": {
-        "dependencies": {
-          "MassTransit": "8.4.0",
-          "MassTransit.AspNetCore": "7.3.1",
-          "MassTransit.RabbitMQ": "8.4.0",
-          "Microsoft.AspNetCore.OpenApi": "9.0.3",
-          "Microsoft.EntityFrameworkCore": "9.0.4",
-          "Npgsql.EntityFrameworkCore.PostgreSQL": "9.0.4",
-          "Serilog.AspNetCore": "9.0.0",
-          "Serilog.Sinks.Console": "6.0.0",
-          "Serilog.Sinks.Elasticsearch": "10.0.0",
-          "Shared": "1.0.0",
-          "Swashbuckle.AspNetCore": "8.1.1"
-        },
-        "runtime": {
-          "Registration.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
-          }
-        }
-      },
       "Shared/1.0.0": {
         "runtime": {
           "Shared.dll": {
@@ -1750,16 +1707,6 @@
       "sha512": "sha512-7mu9v0QDv66ar3DpGSZHg9NuNcxDaaAcnMULuZlaTpP9+hwXhrxNGsF5GmLkSHxFdb5bBc1TzeujsRgTrPWi+Q==",
       "path": "system.threading.ratelimiting/8.0.0",
       "hashPath": "system.threading.ratelimiting.8.0.0.nupkg.sha512"
-    },
-    "Baggage/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Registration/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
     },
     "Shared/1.0.0": {
       "type": "project",

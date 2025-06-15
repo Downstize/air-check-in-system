@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Table, Button, Modal, Form, Input, message, Popconfirm } from 'antd';
-import { LockOutlined } from '@ant-design/icons';
+import React, { useState, useEffect, useCallback } from "react";
+import { Table, Button, Modal, Form, Input, message, Popconfirm } from "antd";
+import { LockOutlined } from "@ant-design/icons";
 import {
   getAllSessions,
   getSessionById,
   createSession,
   updateSession,
-  deleteSession
-} from '../../../api/api';
+  deleteSession,
+} from "../../../api/api";
 
 const AdminSessions = () => {
   const [data, setData] = useState([]);
@@ -23,7 +23,7 @@ const AdminSessions = () => {
       setData(res.data);
     } catch (err) {
       console.error(err);
-      message.error('Ошибка загрузки сессий');
+      message.error("Ошибка загрузки сессий");
     } finally {
       setLoading(false);
     }
@@ -37,7 +37,7 @@ const AdminSessions = () => {
         form.setFieldsValue({ dynamicId: res.data.dynamicId });
       } catch (err) {
         console.error(err);
-        message.error('Ошибка получения данных сессии');
+        message.error("Ошибка получения данных сессии");
         return;
       }
     } else {
@@ -52,47 +52,53 @@ const AdminSessions = () => {
       const vals = await form.validateFields();
       if (editingId) {
         await updateSession(editingId, vals);
-        setData(prev => prev.map(item =>
-          item.id === editingId ? { ...item, dynamicId: vals.dynamicId } : item
-        ));
-        message.success('Сессия обновлена');
+        setData((prev) =>
+          prev.map((item) =>
+            item.id === editingId
+              ? { ...item, dynamicId: vals.dynamicId }
+              : item
+          )
+        );
+        message.success("Сессия обновлена");
       } else {
         const res = await createSession(vals);
-        setData(prev => [...prev, res.data]);
-        message.success('Сессия создана');
+        setData((prev) => [...prev, res.data]);
+        message.success("Сессия создана");
       }
       setModalVisible(false);
     } catch (err) {
       console.error(err);
-      message.error('Ошибка сохранения сессии');
+      message.error("Ошибка сохранения сессии");
     }
   };
 
   const handleDelete = async (id) => {
     try {
       await deleteSession(id);
-      setData(prev => prev.filter(item => item.id !== id));
-      message.success('Сессия удалена');
+      setData((prev) => prev.filter((item) => item.id !== id));
+      message.success("Сессия удалена");
     } catch (err) {
       console.error(err);
-      message.error('Ошибка удаления сессии');
+      message.error("Ошибка удаления сессии");
     }
   };
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const columns = [
-    { title: 'ID', dataIndex: 'id', key: 'id' },
-    { title: 'DynamicId', dataIndex: 'dynamicId', key: 'dynamicId' },
+    { title: "ID", dataIndex: "id", key: "id" },
+    { title: "DynamicId", dataIndex: "dynamicId", key: "dynamicId" },
     {
-      title: 'Создано',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: d => new Date(d).toLocaleString()
+      title: "Создано",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (d) => new Date(d).toLocaleString(),
     },
     {
-      title: 'Действия',
-      key: 'actions',
+      title: "Действия",
+      key: "actions",
       render: (_, record) => (
         <>
           <Button onClick={() => openModal(record.id)}>Изменить</Button>
@@ -100,11 +106,13 @@ const AdminSessions = () => {
             title="Удалить эту сессию?"
             onConfirm={() => handleDelete(record.id)}
           >
-            <Button danger style={{ marginLeft: 8 }}>Удалить</Button>
+            <Button danger style={{ marginLeft: 8 }}>
+              Удалить
+            </Button>
           </Popconfirm>
         </>
-      )
-    }
+      ),
+    },
   ];
 
   return (
@@ -125,7 +133,7 @@ const AdminSessions = () => {
 
       <Modal
         visible={modalVisible}
-        title={editingId ? 'Редактировать сессию' : 'Новая сессия'}
+        title={editingId ? "Редактировать сессию" : "Новая сессия"}
         onOk={handleOk}
         onCancel={() => setModalVisible(false)}
       >
@@ -133,7 +141,7 @@ const AdminSessions = () => {
           <Form.Item
             name="dynamicId"
             label="DynamicId"
-            rules={[{ required: true, message: 'Введите DynamicId' }]}
+            rules={[{ required: true, message: "Введите DynamicId" }]}
           >
             <Input prefix={<LockOutlined />} />
           </Form.Item>

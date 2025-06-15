@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AirCheckInOrchestrator.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+01935010ba38321d05fa78360af40aec913899af")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+538404643cbd4981c8599217265b75f694b8852c")]
 [assembly: System.Reflection.AssemblyProductAttribute("AirCheckInOrchestrator.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AirCheckInOrchestrator.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

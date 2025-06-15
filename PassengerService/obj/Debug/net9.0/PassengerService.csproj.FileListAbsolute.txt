@@ -154,3 +154,14 @@
 /Users/downstize/CSharp_Projects/AirCheckInOrchestrator/PassengerService/bin/Debug/net9.0/Serilog.Sinks.Elasticsearch.dll
 /Users/downstize/CSharp_Projects/AirCheckInOrchestrator/PassengerService/bin/Debug/net9.0/Serilog.Sinks.File.dll
 /Users/downstize/CSharp_Projects/AirCheckInOrchestrator/PassengerService/bin/Debug/net9.0/Serilog.Sinks.PeriodicBatching.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/PassengerService/bin/Debug/net9.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/PassengerService/bin/Debug/net9.0/Microsoft.Extensions.Caching.StackExchangeRedis.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/PassengerService/bin/Debug/net9.0/Microsoft.IdentityModel.Abstractions.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/PassengerService/bin/Debug/net9.0/Microsoft.IdentityModel.JsonWebTokens.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/PassengerService/bin/Debug/net9.0/Microsoft.IdentityModel.Logging.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/PassengerService/bin/Debug/net9.0/Microsoft.IdentityModel.Protocols.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/PassengerService/bin/Debug/net9.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/PassengerService/bin/Debug/net9.0/Microsoft.IdentityModel.Tokens.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/PassengerService/bin/Debug/net9.0/Pipelines.Sockets.Unofficial.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/PassengerService/bin/Debug/net9.0/StackExchange.Redis.dll
+/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/PassengerService/bin/Debug/net9.0/System.IdentityModel.Tokens.Jwt.dll

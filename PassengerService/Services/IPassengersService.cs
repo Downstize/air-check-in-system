@@ -1,4 +1,3 @@
-using PassengerService.Models;
 using Shared.Contracts;
 
 namespace PassengerService.Services;

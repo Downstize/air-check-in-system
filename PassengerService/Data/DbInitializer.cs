@@ -7,7 +7,7 @@ public static class DbInitializer
     public static void Seed(ApplicationDbContext db)
     {
         if (db.Flights.Any()) return;
-        
+
         var f1 = new Flight
         {
             FlightNumber = "SU1001",
@@ -40,11 +40,10 @@ public static class DbInitializer
         };
 
 
-        
         var b1 = new Booking { Pnr = "AB1234", Flight = f1 };
         var b2 = new Booking { Pnr = "CD5678", Flight = f2 };
         var b3 = new Booking { Pnr = "EF9012", Flight = f3 };
-        
+
         var passengers = new List<Passenger>
         {
             new Passenger
@@ -152,7 +151,7 @@ public static class DbInitializer
                 },
                 Booking = b1
             },
-            
+
             new Passenger
             {
                 PassengerId = Guid.NewGuid().ToString(), PnrId = "CD5678", PaxNo = 1, LastName = "Kuznetsov",
@@ -249,7 +248,7 @@ public static class DbInitializer
                 Booking = b2
             },
         };
-        
+
         db.Flights.AddRange(f1, f2, f3);
         db.Bookings.AddRange(b1, b2, b3);
         db.Passengers.AddRange(passengers);

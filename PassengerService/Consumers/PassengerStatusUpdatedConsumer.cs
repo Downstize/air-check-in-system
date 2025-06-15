@@ -1,10 +1,9 @@
-namespace PassengerService.Consumers;
-
 using MassTransit;
-using PassengerService.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using PassengerService.Data;
 using Shared.Messages;
+
+namespace PassengerService.Consumers;
 
 public class PassengerStatusUpdatedConsumer : IConsumer<PassengerStatusUpdated>
 {

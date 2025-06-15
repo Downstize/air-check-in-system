@@ -1,34 +1,11 @@
 {
   "Version": 1,
-  "Hash": "aOzaMnKDNrjH5kU21reakWaWor5sY4ZVpkFWOag1Iag=",
+  "Hash": "ljbNdIjfs6ET2rVffE4jN4TXdoT2aAdNgHxyfHRMMd0=",
   "Source": "AirCheckInOrchestrator.Api",
   "BasePath": "_content/AirCheckInOrchestrator.Api",
   "Mode": "Default",
   "ManifestType": "Build",
-  "ReferencedProjectsConfiguration": [
-    {
-      "Identity": "/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Baggage/Baggage.csproj",
-      "Version": 2,
-      "Source": "Baggage",
-      "GetPublishAssetsTargets": "ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems",
-      "AdditionalPublishProperties": "Configuration=Debug;Platform=AnyCPU",
-      "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework",
-      "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
-      "AdditionalBuildProperties": "Configuration=Debug;Platform=AnyCPU",
-      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework"
-    },
-    {
-      "Identity": "/Users/downstize/CSharp_Projects/AirCheckInOrchestrator/Registration/Registration.csproj",
-      "Version": 2,
-      "Source": "Registration",
-      "GetPublishAssetsTargets": "ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems",
-      "AdditionalPublishProperties": "Configuration=Debug;Platform=AnyCPU",
-      "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework",
-      "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
-      "AdditionalBuildProperties": "Configuration=Debug;Platform=AnyCPU",
-      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework"
-    }
-  ],
+  "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
   "Assets": [],
   "Endpoints": []

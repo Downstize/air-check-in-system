@@ -1,9 +1,10 @@
 using Baggage.Services;
 using Shared.Messages;
+using MassTransit;
 
 namespace Baggage.Consumers;
 
-using MassTransit;
+
 
 
 public class BaggageRegistrationConsumer : IConsumer<BaggageRegistrationRequest>

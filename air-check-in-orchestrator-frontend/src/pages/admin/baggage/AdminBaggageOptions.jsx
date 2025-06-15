@@ -183,7 +183,11 @@ const AdminBaggageOptions = () => {
             label="Вес (кг)"
             rules={[
               { required: true, message: "Введите вес" },
-              { type: "number", min: 0, message: "Не может быть отрицательным" },
+              {
+                type: "number",
+                min: 0,
+                message: "Не может быть отрицательным",
+              },
             ]}
           >
             <InputNumber style={{ width: "100%" }} min={0} step={0.1} />
@@ -193,7 +197,11 @@ const AdminBaggageOptions = () => {
             label="Цена (₽)"
             rules={[
               { required: true, message: "Введите цену" },
-              { type: "number", min: 0, message: "Не может быть отрицательной" },
+              {
+                type: "number",
+                min: 0,
+                message: "Не может быть отрицательной",
+              },
             ]}
           >
             <InputNumber style={{ width: "100%" }} min={0} step={0.01} />
